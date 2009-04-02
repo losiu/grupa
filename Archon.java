@@ -3,7 +3,7 @@ package grupa;
 import battlecode.common.*;
 import static battlecode.common.GameConstants.*;
 
-import static team009.MessageTranslator.*;
+import static grupa.MessageTranslator.*;
 
 public class Archon extends AbstractRobot implements RobotApi{
 

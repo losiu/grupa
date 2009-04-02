@@ -3,7 +3,7 @@ package grupa;
 import static battlecode.common.GameConstants.ENERGON_TRANSFER_RATE;
 import battlecode.common.*;
 
-import static team009.MessageTranslator.*;
+import static grupa.MessageTranslator.*;
 
 public class Soldier extends AbstractRobot implements RobotApi{
 	
