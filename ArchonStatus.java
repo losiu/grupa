@@ -1,0 +1,6 @@
+package grupa;
+
+public enum ArchonStatus {
+		CREATING_ME, SPAWNING_SOLDIERS, LOOKING_FOR_DEPOSIT, DEPOSIT_FOUND, CAPTURING_DEPOSIT;
+}
+
