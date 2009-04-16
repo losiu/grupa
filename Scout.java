@@ -13,9 +13,19 @@ import battlecode.common.*;
  */
 public class Scout extends AbstractRobot implements RobotApi{
     private enum Rotation {LEFT, RIGHT};
+    /*Rotation odpowiada za kierunek, w którym Scout skręca podczas patrolu*/
+
+
+    private static final Double MIN_ENERGON_RESERVE = 1.0;
+
     ScoutStatus state = ScoutStatus.START;
-    Direction patrolDirection;
+
+    /*Zmienne potrzebne do patrolowaia*/
     Rotation patrolRotation = Rotation.RIGHT;
+    Direction patrolDirection;
+    MapLocation fluxLocation = null;
+    Boolean patrolEnemiesNearby = null;
+
     /*Na chwilę obecną mam takie pomysły zastosowania Scouta :
      1) patrolowanie okolicy fluxa
      2) polowanie na archony przeciwnika*/
@@ -47,7 +57,9 @@ public class Scout extends AbstractRobot implements RobotApi{
 
 
     private void readMessages() {
-        /*Czytamy wszystkie wiadomości, które przyszły
+
+        /* TODO : treść metody
+         Czytamy wszystkie wiadomości, które przyszły
          Powinniśmy czytać wszystkie, bo czytanie po jednej może spowodować duże opóźnienia i
          trudności w synchronizacji działań robotów. */
 
@@ -65,17 +77,32 @@ public class Scout extends AbstractRobot implements RobotApi{
                 break;
             case PATROL:
                 /*krótki opis:
-                 1. sprawdz, czy sa wrogowie w poblizu (nie-workery, bo workery są niegroźne)
+                 1. sprawdz, czy sa wrogowie w poblizu
                  2. jeśli tak, wróć do fluxa
                  3. jeśli nie, sprawdź czy masz dość energonu
                  4. jeśli nie, wróć do fluxa
                  5. jeśli tak, kontynuuj patrol*/
 
-                if (senseEnemyRobots().length != 0) {
+                if (senseEnemyRobots().length > 0) {
+                    patrolEnemiesNearby = true;
+                    state = ScoutStatus.RETURN_TO_FLUX;
+                    break;
                 }
+
+                if (myRC.getEnergonLevel() - travelCost(myRC.getLocation(), fluxLocation)
+                        < 4*singleDiagonalMoveCost() ) {
+                    /*jezeli mamy malo energii, wracamy*/
+                    state = ScoutStatus.RETURN_TO_FLUX;
+                    break;
+                }
+
+
+                patrolDirection = newPatrolDirection(myRC.getLocation().directionTo(fluxLocation));
                 
-                if (!move(patrolDirection)) {
+                if (!myRC.canMove(patrolDirection)) {
                     changeRotation();
+                } else {
+                    move(patrolDirection);
                 }
 
                 break;

@@ -136,7 +136,7 @@ public abstract class AbstractRobot implements RobotApi {
 		
 		int count = 0;
 		
-		for (int i = 1; i < allRobots.length; i++){
+		for (int i = 0; i < allRobots.length; i++){
 			try{
                 if (myRC.canSenseObject(allRobots[i])){
                 
@@ -154,7 +154,7 @@ public abstract class AbstractRobot implements RobotApi {
 		
 		int j = 0;
 		
-		for (int i = 1; i < allRobots.length; i++){
+		for (int i = 0; i < allRobots.length; i++){
 			try {
                 if (myRC.canSenseObject(allRobots[i])){
                 
@@ -172,7 +172,8 @@ public abstract class AbstractRobot implements RobotApi {
         /*Niwe wiadomo, ile naprawdę pól jest wypełnionych 
          niektóre roboty mogły uciec z pola widzenia naszego robota
          Dlatego tablicę wynikową trzeba uzupełnić*/
-        for (int i = j; i < allRobots.length; i++) {
+        
+        for (int i = j; i < count; i++) {
             myRobots[j] = null;
         }
 		
@@ -261,6 +262,7 @@ public abstract class AbstractRobot implements RobotApi {
         }
 		/* To nie wygląda na poprawny kod
          * przecież, jeśli zmienimy kierunek na direction, to już się nie ruszamy
+         *
 		if (myRC.canMove(direction) && direction != myRC.getDirection()) {
 			myRC.setDirection(direction);
 		} else {
@@ -350,6 +352,13 @@ public abstract class AbstractRobot implements RobotApi {
 
     /*Tutaj proponuje umieścić metody odpowiedzialne za ocenianie możliwości robota
      np. liczenie ile energonu jest potrzebne żeby dojść z jednej lokacji do drugiej, itp.*/
+
+
+    protected double singleDiagonalMoveCost() {
+        return (myRC.getRobotType().energonUpkeep() * (myRC.getRobotType().moveDelayDiagonal() + 1));
+    }
+
+
     protected double travelCost(MapLocation start, MapLocation end) {
         /*@return Zwraca minimalną ilość energonu, który jest potrzebny
          aby przejść najkrótszą drogą z start do end
