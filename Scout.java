@@ -15,16 +15,17 @@ public class Scout extends AbstractRobot implements RobotApi{
     private enum Rotation {LEFT, RIGHT};
     /*Rotation odpowiada za kierunek, w którym Scout skręca podczas patrolu*/
 
-
+    /*Stale*/
     private static final Double MIN_ENERGON_RESERVE = 1.0;
-
+    private static final Double PATROL_DISTANCE = 5.0;
+    
     ScoutStatus state = ScoutStatus.START;
 
     /*Zmienne potrzebne do patrolowaia*/
     Rotation patrolRotation = Rotation.RIGHT;
     Direction patrolDirection;
     MapLocation fluxLocation = null;
-    Boolean patrolEnemiesNearby = null;
+    RobotInfo patrolEnemiesNearby = null;
 
     /*Na chwilę obecną mam takie pomysły zastosowania Scouta :
      1) patrolowanie okolicy fluxa
@@ -64,7 +65,9 @@ public class Scout extends AbstractRobot implements RobotApi{
          trudności w synchronizacji działań robotów. */
 
         for (Message m : myRC.getAllMessages()) {
-
+            if (msgIsToMe(m)) {
+                
+            }
         }
     }
 
@@ -82,9 +85,13 @@ public class Scout extends AbstractRobot implements RobotApi{
                  3. jeśli nie, sprawdź czy masz dość energonu
                  4. jeśli nie, wróć do fluxa
                  5. jeśli tak, kontynuuj patrol*/
+                if (fluxLocation == null) {
+                    /*To nie powinno się przydazyc, ale na wszelki wypadek..*/
+                    state = ScoutStatus.START;
+                }    
 
-                if (senseEnemyRobots().length > 0) {
-                    patrolEnemiesNearby = true;
+                patrolEnemiesNearby = senseNearestEnemyRobot();
+                if (patrolEnemiesNearby != null) {
                     state = ScoutStatus.RETURN_TO_FLUX;
                     break;
                 }
@@ -94,6 +101,11 @@ public class Scout extends AbstractRobot implements RobotApi{
                     /*jezeli mamy malo energii, wracamy*/
                     state = ScoutStatus.RETURN_TO_FLUX;
                     break;
+                }
+                
+                if (fluxLocation.distanceSquaredTo(myRC.getLocation()) < PATROL_DISTANCE*PATROL_DISTANCE) {
+                    /*Jesli jestesmy za blisko fluxa, odsuwamy się*/
+                    move(myRC.getLocation().directionTo(fluxLocation).opposite());
                 }
 
 
@@ -105,6 +117,19 @@ public class Scout extends AbstractRobot implements RobotApi{
                     move(patrolDirection);
                 }
 
+                break;
+            case RETURN_TO_FLUX:
+                if (patrolEnemiesNearby != null) {
+                    /*Jesli wracamy, bo zauwazono przeciwnika, trzeba o tym poinformowac inne roboty
+                     TODO: wyslij wiadomosc wszystkim robotom
+                     Przed wysylaniem wiadomosci, mozna sprawdzic, czy wrog sie nie przyblizyl*/
+
+                }
+                move(myRC.getLocation().directionTo(fluxLocation));
+
+                break;
+            case FIGHT:
+                /*chyba przyda sie tu jakis tryb bojowy*/
                 break;
             case FIND_ARCHONS:
                 break;

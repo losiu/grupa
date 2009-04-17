@@ -10,7 +10,7 @@ package grupa;
  * @author liorin
  */
 public enum ScoutStatus {
-    START, KILL_ARCHON, FIND_ARCHONS, PATROL, RETURN_TO_FLUX
+    START, KILL_ARCHON, FIND_ARCHONS, PATROL, RETURN_TO_FLUX, FIGHT
     /*Wyjasnienie przeznaczenia tych statusów:
      START : stan początkowy
      KILL_ARCHON : atak na wrogiego archona

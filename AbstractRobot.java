@@ -59,6 +59,23 @@ public abstract class AbstractRobot implements RobotApi {
 		
 	}
 
+    protected Robot[] senseAllRobotsNearby() {
+        Robot[] groundRobots, airRobots;
+        Robot[] allRobots;
+        groundRobots = myRC.senseNearbyGroundRobots();
+        airRobots = myRC.senseNearbyAirRobots();
+        if (groundRobots.length == 0) 
+            return airRobots;
+        if (airRobots.length == 0)
+            return groundRobots;
+        
+        allRobots = new Robot[groundRobots.length + airRobots.length];
+        System.arraycopy(groundRobots, 0, allRobots, 0, groundRobots.length);
+        System.arraycopy(airRobots, 0, allRobots, groundRobots.length, airRobots.length);
+        return allRobots;
+    }
+
+
 
 	
 	public Robot[] senseEnemyRobots() {
@@ -125,6 +142,26 @@ public abstract class AbstractRobot implements RobotApi {
 		return enemyRobots;
 		
 	}
+
+    protected RobotInfo senseNearestEnemyRobot() {
+        RobotInfo suspect = null;
+        Robot[] allRobots;
+        double distance = 100.0; /*na pewno nie wykrywamy robotow w tej odleglosci */
+        allRobots = senseAllRobotsNearby();
+        for (Robot r : allRobots) {
+            try {
+                RobotInfo inf = myRC.senseRobotInfo(r);
+                if (inf.team != myRC.getTeam()) {
+                    if (inf.location.distanceSquaredTo(myRC.getLocation()) < distance) {
+                        suspect = inf;
+                        distance = inf.location.distanceSquaredTo(myRC.getLocation());
+                    }
+                }
+
+            } catch (Exception e) {}
+        }
+        return suspect;
+    }
 	
 	
 	public Robot[] senseMyRobots(RobotType robotType) {

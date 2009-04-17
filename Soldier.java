@@ -154,7 +154,6 @@ public class Soldier extends AbstractRobot implements RobotApi{
 			myDirection = toDirection(message.ints[1]);
 		}
 		
-		
 		switch(status){
 		
 			/*
@@ -166,6 +165,7 @@ public class Soldier extends AbstractRobot implements RobotApi{
 				break;
 			*/
 				
+                
 			case MOVING_WITH_ARCHON:
 				
 				transferEnergon();
