@@ -4,6 +4,10 @@ import battlecode.common.*;
 
 //import static battlecode.common.GameConstants.*;
 
+/**
+*
+* @author losiu
+*/
 public abstract class AbstractRobot implements RobotApi {
 	
 	protected final RobotController myRC;
@@ -250,9 +254,11 @@ public abstract class AbstractRobot implements RobotApi {
 
 	public void tryToMoveInDirection(Direction direction) {
 		
-	
+		/*
+		 * [losiu] wracam narazie do poprzedniej wersji,
+		 * bo roboty teraz troszke wariuja - patrz ponizej
         if (!move(direction) ) {
-            /*Nie jestem pewien, jaki byl pierwotny zamysl, ale na razie niech bedzie tak*/
+            //[lorin] Nie jestem pewien, jaki byl pierwotny zamysl, ale na razie niech bedzie tak
             try {
                 if (myRC.hasActionSet()) {
                     myRC.yield();
@@ -260,20 +266,48 @@ public abstract class AbstractRobot implements RobotApi {
                 myRC.setDirection(myRC.getDirection().rotateRight());
             } catch (Exception e) {}
         }
-		/* To nie wygląda na poprawny kod
-         * przecież, jeśli zmienimy kierunek na direction, to już się nie ruszamy
-         *
-		if (myRC.canMove(direction) && direction != myRC.getDirection()) {
-			myRC.setDirection(direction);
-		} else {
-			if(myRC.canMove(myRC.getDirection())){
-				myRC.moveForward();
+		*/
+		
+		/* 
+		 * [lorin]: To nie wygląda na poprawny kod
+         * przecież, jeśli zmienimy kierunek na direction,
+         * to już się nie ruszamy
+ 		 *
+		 * [losiu]: uzycie tej metody jest nastepujace:
+		 * chcemy isc w zadanym z gory DIRECTION jak tylko jest to mozliwe,
+		 * (np. szukajac fluxu) wiec:
+		 * 
+		 * jesli mozesz isc w kierunku DIRECTION, a twoj kierunek jest inny,
+		 * to ustaw swoj na ten preferowany, 
+		 * ale jesli nie mozliwe: to idz w swoim kierunku,
+		 * ale jesli nie mozesz nawet w tym swoim: to go zmien
+		 * 
+		 * mozna poprawic ze po kazdej zmianie kierunku mamy od razu
+		 * yield i moveForward,
+		 * ale kolejne wywolanie metody tez to zalatwi
+		 * (no chyba ze raptem okaze sie
+		 * ze mozna juz isc w kierunku ktory preferujemy,
+		 * ale to chyba jeszcze lepiej) 
+		 */
+		
+		try {
+			
+			if (myRC.canMove(direction) && direction != myRC.getDirection()) {
+				myRC.setDirection(direction);
 			} else {
-				myRC.setDirection(myRC.getDirection().rotateRight());
+				if(myRC.canMove(myRC.getDirection())){
+					myRC.moveForward();
+				} else {
+					myRC.setDirection(myRC.getDirection().rotateRight());
+				}
+						
 			}
-					
-		}
-         */
+			
+        } catch (Exception e) { return;}
+
+        
+	
+       
 	
 		myRC.yield();
 		

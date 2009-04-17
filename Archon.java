@@ -5,6 +5,10 @@ import static battlecode.common.GameConstants.*;
 
 import static grupa.MessageTranslator.*;
 
+/**
+*
+* @author losiu
+*/
 public class Archon extends AbstractRobot implements RobotApi{
 
 	private ArchonStatus status = ArchonStatus.LOOKING_FOR_DEPOSIT;
@@ -161,7 +165,7 @@ public class Archon extends AbstractRobot implements RobotApi{
 		Robot[] soldiers = senseMyRobots(RobotType.SOLDIER);
 		Robot[] archons = senseMyRobots(RobotType.ARCHON);
 		
-		if (soldiers.length < 3 * archons.length){
+		if (soldiers.length < 3){
 		
 			if (hasEnergonToSpawn(RobotType.SOLDIER)){
 				spawnSoldier(myRC.getDirection());
@@ -438,17 +442,24 @@ public class Archon extends AbstractRobot implements RobotApi{
  		Direction direction;
  		
  		//System.out.println("lookingForNearestDeposit = " + lookingForNearestDeposit);
-			
+		
+ 		//[losiu] chwilowo zrobilem tak, ze wszyscie archony chca
+ 		//dojsc do najblizszego flux deposit
+ 		direction = myRC.senseDirectionToUnownedFluxDeposit();
+ 		
+ 		/*
  		if (lookingForNearestDeposit) {
  			direction = myRC.senseDirectionToUnownedFluxDeposit();
  		} else {
  			//direction = myRC.getDirection();
  			direction = myDirection;
- 			if (Clock.getRoundNum() > roundNumNotNearest + ROUNDS_TO_CAPTURE / 2){
+ 			if (Clock.getRoundNum() > roundNumNotNearest + 5){
  				lookingForNearestDeposit = true;
  			}
 					
  		}
+ 		*/
+ 		
 		
 		if (direction == Direction.OMNI) {
 				
@@ -530,13 +541,13 @@ public class Archon extends AbstractRobot implements RobotApi{
 					
 			case LOOKING_FOR_DEPOSIT:
 				
-				//spawnSoldiers();
+				spawnSoldiers();
 				
-				//fillRobotsWithEnergon();
+				fillRobotsWithEnergon();
 				
 				findFlux();
 				
-				//sendRequestToSoldiers();
+				sendRequestToSoldiers();
 			
 				break;
 			
