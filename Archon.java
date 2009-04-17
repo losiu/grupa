@@ -1,24 +1,45 @@
 package grupa;
 
+import java.util.HashMap;
+
 import battlecode.common.*;
 import static battlecode.common.GameConstants.*;
 
 import static grupa.MessageTranslator.*;
 
 /**
-*
 * @author losiu
 */
 public class Archon extends AbstractRobot implements RobotApi{
 
 	private ArchonStatus status = ArchonStatus.LOOKING_FOR_DEPOSIT;
 	
-	private boolean lookingForNearestDeposit = true;
 	
+	// LOOKING_FOR_DEPOSIT:
+	
+	private boolean lookingForNearestDeposit = true;
 	private int roundNumNotNearest;
-		
 	private Direction myDirection  = Direction.NORTH;
-		
+	
+	
+	
+	// CAPTURING_DEPOSIT:
+	
+	//tyle maks rund WORKER moze przezyc bez transferu energon
+	static public final double MAX_ROUNDS_WORKER_HAVE_NOT_BE_SEEN
+		= RobotType.WORKER.maxEnergon() / RobotType.WORKER.energonUpkeep();
+	
+	static public final int MAX_WORKERS = 5;
+	
+	// Archon wie gdzie warto szukac blokow
+	MapLocation[] blocksLocations;
+
+	// informacja o tym kiedy ostatnio widziano workera o podanym id
+	// aby okreslic ile posiadamy workerow - chcemy miec ich okreslona ilosc
+	private HashMap<Integer, Integer> workers = new HashMap<Integer, Integer>();
+	
+	
+	
 	public Archon(RobotController rc) {
 		super(rc);
 	}
@@ -97,7 +118,7 @@ public class Archon extends AbstractRobot implements RobotApi{
 		
 	}
 	
-	public boolean spawnSoldier(Direction direction) throws Exception{
+	public boolean spawnRobot(Direction direction, RobotType robotType) throws Exception{
 
 		boolean hasBeenSpawned = false;
 		
@@ -109,9 +130,9 @@ public class Archon extends AbstractRobot implements RobotApi{
 			myRC.yield();
 		}
 		
-		if (canSpawn(myRC.getDirection(), RobotType.SOLDIER)){
+		if (canSpawn(myRC.getDirection(), robotType)){
 			
-				myRC.spawn(RobotType.SOLDIER);
+				myRC.spawn(robotType);
 				hasBeenSpawned = true;
 				myRC.yield();
 				
@@ -152,7 +173,7 @@ public class Archon extends AbstractRobot implements RobotApi{
 				myRC.yield();
 			}
 			
-			if (spawnSoldier(direction))
+			if (spawnRobot(direction, RobotType.SOLDIER))
 				spawnedSoldiersNum++;
 			
 			direction = direction.rotateRight();
@@ -160,20 +181,47 @@ public class Archon extends AbstractRobot implements RobotApi{
 		}
 	}
 	
-	public void spawnSoldiers() throws Exception{
+	public void spawnRobots(RobotType robotType) throws Exception{
 		
 		Robot[] soldiers = senseMyRobots(RobotType.SOLDIER);
-		Robot[] archons = senseMyRobots(RobotType.ARCHON);
+		//Robot[] archons = senseMyRobots(RobotType.ARCHON);
 		
-		if (soldiers.length < 3){
+		boolean shouldBeSpawned = true;
 		
-			if (hasEnergonToSpawn(RobotType.SOLDIER)){
-				spawnSoldier(myRC.getDirection());
+		switch(robotType){
+			case WORKER:
+				
+				Robot[] robots = senseMyRobots(RobotType.WORKER);
+				for (int i = 0; i < robots.length; i++){
+					workers.remove(robots[i].getID());
+					workers.put(robots[i].getID(), Clock.getRoundNum());	
+				}
+				
+				int workersNum = 0;
+				
+				for (int key: workers.keySet()){
+					if (workers.get(key) + MAX_ROUNDS_WORKER_HAVE_NOT_BE_SEEN < Clock.getRoundNum())
+						workersNum++;
+					else
+						workers.remove(key);
+				}
+				
+				if (workersNum >= MAX_WORKERS)
+					shouldBeSpawned = false;
+				
+		}
+		
+		
+		if (shouldBeSpawned){
+		
+			if (hasEnergonToSpawn(robotType)){
+				spawnRobot(myRC.getDirection(), robotType);
 			}
 			
 		}
 		
 	}
+	
 	
 	/*
 	public double directionRang(Direction newDirection, Direction direction, MapLocation[] archons){
@@ -473,15 +521,34 @@ public class Archon extends AbstractRobot implements RobotApi{
 		
 	}
 	
-	static public Message moveInDirectionMsg(Direction direction){
+	/*
+	public Message moveInDirectionMsg(Direction direction){
 		
 		int[] ints = new int[2];
 		
-		ints[0] = MOVE_IN_DIRECTION;
-		ints[1] = toInt(direction);
+		ints[0] = MOVE_TO_FLUX_DEPOSIT;
+		ints[1] = myRC.getLocation();
+		//ints[1] = toInt(direction);
 		
 		Message message = new Message(); 
 		message.ints = ints;
+		
+		return message;
+		
+	}
+	*/
+	
+	public Message msgMoveToFluxDeposit(){
+		
+		int[] ints = new int[1];
+		ints[0] = MOVE_TO_FLUX_DEPOSIT;
+		
+		MapLocation[] locations = new MapLocation[1];
+		locations[0] = myRC.getLocation();
+		
+		Message message = new Message(); 
+		message.ints = ints;
+		message.locations = locations;
 		
 		return message;
 		
@@ -507,7 +574,7 @@ public class Archon extends AbstractRobot implements RobotApi{
 		
 		if (senseMaxArchonId() == myRC.getRobot().getID()){
 			
-			Message message = moveInDirectionMsg(direction);
+			Message message = msgMoveToFluxDeposit();
 			myRC.broadcast(message);
 			myRC.yield();
 			
@@ -541,13 +608,13 @@ public class Archon extends AbstractRobot implements RobotApi{
 					
 			case LOOKING_FOR_DEPOSIT:
 				
-				spawnSoldiers();
+				//spawnRobots(RobotType.SOLDIER);
 				
-				fillRobotsWithEnergon();
+				//fillRobotsWithEnergon();
 				
 				findFlux();
 				
-				sendRequestToSoldiers();
+				//sendRequestToSoldiers();
 			
 				break;
 			
@@ -555,13 +622,16 @@ public class Archon extends AbstractRobot implements RobotApi{
 				
 				fillRobotsWithEnergon();
 				
-				//blocksLocations = myRC.senseNearbyBlocks();
+				blocksLocations = myRC.senseNearbyBlocks();
 				
 				status = ArchonStatus.CAPTURING_DEPOSIT;
 				
 				break;
 				
 			case CAPTURING_DEPOSIT:
+				
+				spawnRobots(RobotType.WORKER);
+				
 				break;
 		}
 		
