@@ -1,6 +1,9 @@
 package grupa;
 
 import battlecode.common.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
 
 //import static battlecode.common.GameConstants.*;
 
@@ -9,7 +12,10 @@ import battlecode.common.*;
 * @author losiu
 */
 public abstract class AbstractRobot implements RobotApi {
-	
+
+	static public final int INT_PER_MSG = 4;
+    static public final int LOC_PER_MSG = 2;
+
 	protected final RobotController myRC;
 	
 	public AbstractRobot(RobotController rc) {
@@ -383,13 +389,88 @@ public abstract class AbstractRobot implements RobotApi {
 		return idRobot;
 		
 	}
+
+
+    /*Tu będzie parsowanie wiadomości*/
+
+    int typeToInt(RobotType type) {
+
+        /*+1, zeby zaczynalo sie od 1*/
+        switch (type) {
+            case ARCHON:
+                return -1;
+            case WORKER:
+                return-2;
+            case SOLDIER:
+                return -3;
+            case SCOUT:
+                return -4;
+            case CANNON:
+                return -5;
+            case CHANNELER:
+            default:
+                return -6;
+        }
+
+
+    }
+
+    RobotType intToType(int num) {
+        switch (num) {
+            case -1:
+                return RobotType.ARCHON;
+            case -2:
+                return RobotType.WORKER;
+            case -3:
+                return RobotType.SOLDIER;
+            case -4:
+                return RobotType.SCOUT;
+            case -5:
+                return RobotType.CANNON;
+            case -6:
+                return RobotType.CHANNELER;
+            default:
+                return null;
+        }
+
+    }
+
 	
 	boolean msgIsToMe(Message message){
 		//return (message.ints[1] == myRC.getRobot().getID());
-		
-		//TODO: it depends on message type
-		return true;
+	
+		return (message.ints[1] == 0 || message.ints[1] == myRC.getRobot().getID()
+                || message.ints[1] == typeToInt(myRC.getRobotType()));
 	}
+
+     public Message[] parseMessage(Message m) {
+        List<Message> pMes = new ArrayList<Message>();
+        int i;
+
+        for (i =0; i < (m.ints.length / 4); i++) {
+
+            Message newM = new Message();
+            newM.ints = new int[INT_PER_MSG];
+            newM.locations = new MapLocation[LOC_PER_MSG];
+            System.arraycopy(newM.ints, 0, m.ints, INT_PER_MSG * i , INT_PER_MSG);
+            System.arraycopy(newM.locations, 0, m.locations, LOC_PER_MSG * i, LOC_PER_MSG);
+            pMes.add(newM);
+        }
+
+        return (Message []) pMes.toArray();
+    }
+
+    public Message[] parseMessages(Message[] messages) {
+        List<Message> pMessages = new ArrayList<Message>();
+        for (Message m : messages) {
+            pMessages.addAll( java.util.Arrays.asList(parseMessage(m)) );
+        }
+
+        Message[] parsedMessages = (Message[]) pMessages.toArray();
+        return parsedMessages;
+    }
+
+
 	
 	//converts direction to int
 	static public int toInt(Direction direction){

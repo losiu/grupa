@@ -64,7 +64,7 @@ public class Scout extends AbstractRobot implements RobotApi{
          Powinniśmy czytać wszystkie, bo czytanie po jednej może spowodować duże opóźnienia i
          trudności w synchronizacji działań robotów. */
 
-        for (Message m : myRC.getAllMessages()) {
+        for (Message m : parseMessages(myRC.getAllMessages()) ) {
             if (msgIsToMe(m)) {
                 
             }
