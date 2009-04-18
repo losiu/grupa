@@ -658,7 +658,7 @@ public class Archon extends AbstractRobot implements RobotApi{
 	                myRC.yield();
 	            }
 				
-				myRC.setDirection(direction);
+				
 	            myRC.yield();
 				
 				status = ArchonStatus.CAPTURING_DEPOSIT;

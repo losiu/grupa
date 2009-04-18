@@ -442,31 +442,23 @@ public abstract class AbstractRobot implements RobotApi {
                 || message.ints[1] == typeToInt(myRC.getRobotType()));
 	}
 
-     public Message[] parseMessage(Message m) {
-        List<Message> pMes = new ArrayList<Message>();
-        int i;
-
-        for (i =0; i < (m.ints.length / 4); i++) {
-
-            Message newM = new Message();
-            newM.ints = new int[MessageTranslator.INT_PER_MSG];
-            newM.locations = new MapLocation[MessageTranslator.LOC_PER_MSG];
-            System.arraycopy(newM.ints, 0, m.ints, MessageTranslator.INT_PER_MSG * i , MessageTranslator.INT_PER_MSG);
-            System.arraycopy(newM.locations, 0, m.locations, MessageTranslator.LOC_PER_MSG * i, MessageTranslator.LOC_PER_MSG);
-            pMes.add(newM);
-        }
-
-        return (Message []) pMes.toArray();
-    }
-
-    public Message[] parseMessages(Message[] messages) {
-        List<Message> pMessages = new ArrayList<Message>();
-        for (Message m : messages) {
-            pMessages.addAll( java.util.Arrays.asList(parseMessage(m)) );
-        }
-
-        Message[] parsedMessages = (Message[]) pMessages.toArray();
-        return parsedMessages;
+    void sendMessage(int type, int adresat, Direction dir, MapLocation[] locations) {
+        try {
+            if (myRC.hasActionSet()) {
+                myRC.yield();
+            }
+            Message m = new Message();
+            m.locations = locations;
+            m.ints = new int[MessageTranslator.INT_PER_MSG];
+            m.ints[0] = type;
+            m.ints[1] = adresat;
+            m.ints[2] = Clock.getRoundNum();
+            if (dir != null) {
+                m.ints[3] = toInt(dir);
+            }
+            myRC.broadcast(m);
+            myRC.yield();
+        } catch (Exception e) {}
     }
 
 

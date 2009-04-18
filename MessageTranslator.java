@@ -10,6 +10,7 @@ import java.util.Arrays.*;
 //import static battlecode.common.GameConstants.*;
 
 public class MessageTranslator{
+    /*rezygnujemy z tego pakowania wielu wiadomosci do jendej*/
     
 	//message.ints[0] = type
     /*message.ints[1] = target (id robota, jesli do konkretnego)
@@ -23,24 +24,22 @@ public class MessageTranslator{
     
     static public final int INT_PER_MSG = 4;
     static public final int LOC_PER_MSG = 2;
-    
+    /*
+
+     Numery typów wiadomości
+
+     */
 	static public final int MOVE_IN_DIRECTION = 0;
 	
 	static public final int MOVE_TO_FLUX_DEPOSIT = 1;
 
+	static public final int BLOCKS = 5;
+    static public final int ENEMY_NEAR = 6;
+    static public final int ATTACK_FLUX = 7;
 
 
     static public final int ATTACK_AIR = 100;
     static public final int ATTACK_GROUND = 101;
     static public final int HOLD_FIRE = 102;
-	// message.locations[0] = archon's location
-    // message.locations[1] = lokacja wroga || cokolwiek innego, jesli bedze potrzebne
-    
-    /*Wydaje mi się, że stringów nie potrzebujemy*/
-    
-   
-    
-   
-    
     
 }

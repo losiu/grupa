@@ -21,17 +21,17 @@ public class Cannon extends AbstractRobot implements RobotApi {
         status = CannonStatus.YIELD;
     }
     private void readMessages() {
-        for (Message m : parseMessages(myRC.getAllMessages()) ) {
+        for (Message m : myRC.getAllMessages() ) {
             if (msgIsToMe(m)) {
                 switch (m.ints[0]) {
                     case MessageTranslator.ATTACK_AIR:
                         status = CannonStatus.FIRE;
-                        attackTarget = m.locations[1];
+                        attackTarget = m.locations[0];
                         attackAir = true;
                         break;
                     case MessageTranslator.ATTACK_GROUND:
                         status = CannonStatus.FIRE;
-                        attackTarget = m.locations[1];
+                        attackTarget = m.locations[0];
                         attackAir = false;
                         break;
                     case MessageTranslator.HOLD_FIRE:

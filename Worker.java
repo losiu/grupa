@@ -5,6 +5,8 @@ package grupa;
 import static battlecode.common.GameConstants.WORKER_MAX_HEIGHT_DELTA;
 
 import java.util.HashSet;
+import java.util.Set;
+import java.util.Arrays;
 
 import battlecode.common.*;
 //import static battlecode.common.GameConstants.*;
@@ -16,6 +18,9 @@ public class Worker extends AbstractRobot implements RobotApi{
 	HashSet<MapLocation> locationsOfUnloadedBlocks = new HashSet<MapLocation>();
 	
 	MapLocation depositLocation;
+
+/*dodalem*/
+    Set<MapLocation> possibleBlockLocations = new HashSet<MapLocation>();
 	
 	//Direction lookingForDirection;
 	
@@ -111,7 +116,7 @@ private boolean isLocationOfBuildingOrNeighbourhood(MapLocation location) throws
 		int blocksLocationsNum = 0;
 		MapLocation nearestBlock = null;
 			
-		for (int i = 1; i < allBlocksLocations.length; i++){
+		for (int i = 0; i < allBlocksLocations.length; i++){
 			if (!isLocationOfBuilding(allBlocksLocations[i])){
 				blocksLocationsNum++;
 			}
@@ -169,9 +174,20 @@ private boolean isLocationOfBuildingOrNeighbourhood(MapLocation location) throws
 
 	 }
 
+    private void readMessages() {
+        for (Message m : myRC.getAllMessages() ) {
+            if (msgIsToMe(m)) {
+                switch (m.ints[0]) {
+                    case MessageTranslator.BLOCKS :
+                        possibleBlockLocations.addAll(Arrays.asList(m.locations) );
+                        break;
+                }
+            }
+        }
+    }
 	
 	public void nextTurn() throws Exception{
-		
+		readMessages();
 		switch(status){
 			case CREATING_ME:
 				
