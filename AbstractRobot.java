@@ -13,8 +13,7 @@ import java.util.Arrays;
 */
 public abstract class AbstractRobot implements RobotApi {
 
-	static public final int INT_PER_MSG = 4;
-    static public final int LOC_PER_MSG = 2;
+	
 
 	protected final RobotController myRC;
 	
@@ -450,10 +449,10 @@ public abstract class AbstractRobot implements RobotApi {
         for (i =0; i < (m.ints.length / 4); i++) {
 
             Message newM = new Message();
-            newM.ints = new int[INT_PER_MSG];
-            newM.locations = new MapLocation[LOC_PER_MSG];
-            System.arraycopy(newM.ints, 0, m.ints, INT_PER_MSG * i , INT_PER_MSG);
-            System.arraycopy(newM.locations, 0, m.locations, LOC_PER_MSG * i, LOC_PER_MSG);
+            newM.ints = new int[MessageTranslator.INT_PER_MSG];
+            newM.locations = new MapLocation[MessageTranslator.LOC_PER_MSG];
+            System.arraycopy(newM.ints, 0, m.ints, MessageTranslator.INT_PER_MSG * i , MessageTranslator.INT_PER_MSG);
+            System.arraycopy(newM.locations, 0, m.locations, MessageTranslator.LOC_PER_MSG * i, MessageTranslator.LOC_PER_MSG);
             pMes.add(newM);
         }
 
