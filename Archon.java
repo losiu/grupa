@@ -188,6 +188,7 @@ public class Archon extends AbstractRobot implements RobotApi{
 		
 		boolean shouldBeSpawned = true;
 		
+		
 		switch(robotType){
 			case WORKER:
 				
@@ -202,14 +203,13 @@ public class Archon extends AbstractRobot implements RobotApi{
 				for (int key: workers.keySet()){
 					if (workers.get(key) + MAX_ROUNDS_WORKER_HAVE_NOT_BE_SEEN < Clock.getRoundNum())
 						workersNum++;
-					else
-						workers.remove(key);
 				}
 				
 				if (workersNum >= MAX_WORKERS)
 					shouldBeSpawned = false;
 				
 		}
+		
 		
 		
 		if (shouldBeSpawned){
@@ -581,6 +581,34 @@ public class Archon extends AbstractRobot implements RobotApi{
 		}
 			
 	}
+		
+	public Direction senseDirectionToBlocks(){
+	
+		MapLocation[] blocksLocations = myRC.senseNearbyBlocks();
+		
+		Direction directionToBlocks = Direction.NONE;
+			
+		//the block which can be loaded or the nearest block		
+		if (blocksLocations.length > 0) {
+			
+			double minDistance = myRC.getLocation().distanceSquaredTo(blocksLocations[0]);
+			
+			for (int i = 0; i < blocksLocations.length; i++){
+				
+				double distance = myRC.getLocation().distanceSquaredTo(blocksLocations[i]);
+				
+				if (minDistance > distance) {
+					minDistance = distance;
+					directionToBlocks = myRC.getLocation().directionTo(blocksLocations[i]);
+				}
+				
+			}
+			
+		}
+		
+		return directionToBlocks;
+		
+	}
 	
 	
 	public void nextTurn() throws Exception{
@@ -623,6 +651,15 @@ public class Archon extends AbstractRobot implements RobotApi{
 				fillRobotsWithEnergon();
 				
 				blocksLocations = myRC.senseNearbyBlocks();
+				
+				Direction direction = senseDirectionToBlocks();
+				
+				while (myRC.hasActionSet() || myRC.isMovementActive()) {
+	                myRC.yield();
+	            }
+				
+				myRC.setDirection(direction);
+	            myRC.yield();
 				
 				status = ArchonStatus.CAPTURING_DEPOSIT;
 				
